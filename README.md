@@ -1,5 +1,8 @@
 # go-fork-listener
 
+[![Language: Go](https://img.shields.io/badge/lang-Go-6ad7e5.svg?style=flat-square&logo=go)](https://golang.org/)
+[![Go Reference](https://pkg.go.dev/badge/go.linka.cloud/go-fork-listener.svg)](https://pkg.go.dev/go.linka.cloud/go-fork-listener)
+
 Go package for listening on a socket and forking a detached child process on each connection.
 
 This is useful if you need to be able to restart a process without interrupting any connections, like *sshd*.
@@ -71,13 +74,8 @@ func main() {
 	defer lis.Close()
 
 	if lis.IsParent() {
-		
 		// do some configuration checks or other things that need to be done only once
-		
-		if err := lis.Start(); err != nil {
-			logrus.Fatal(err)
-		}
-		if err := lis.Wait(); err != nil {
+		if err := lis.Run(); err != nil {
 			logrus.Fatal(err)
 		}
 		return
@@ -93,4 +91,5 @@ func main() {
 		logrus.Fatal(err)
 	}
 }
+
 ```

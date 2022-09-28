@@ -15,6 +15,7 @@
 package fork
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -31,20 +32,32 @@ var (
 	ErrClosed = errors.New("connection closed")
 )
 
+// IsClosed returns true if the error is due to a closed connection.
 func IsClosed(err error) bool {
 	return errors.Is(err, ErrClosed)
 }
 
 type Listener interface {
 	net.Listener
+	// Start starts the listener in the background.
 	Start() error
+	// Wait waits for the listener to exit
 	Wait() error
+	// Run starts the listener in the background and waits for it to exit.
+	Run() error
+	// IsChild returns true if the current process is a forked child process.
 	IsChild() bool
+	// IsParent returns true if the current process is the main (parent) process.
 	IsParent() bool
 }
 
 // Listen creates a new listener that will fork a child process when a new connection is accepted.
 func Listen(network, address string, opts ...Option) (Listener, error) {
+	return ListenContext(context.Background(), network, address, opts...)
+}
+
+// ListenContext creates a new listener that will fork a child process when a new connection is accepted.
+func ListenContext(ctx context.Context, network, address string, opts ...Option) (Listener, error) {
 	o := defaultOptions
 	for _, opt := range opts {
 		opt(&o)
@@ -52,7 +65,8 @@ func Listen(network, address string, opts ...Option) (Listener, error) {
 	if os.Getenv(o.env) == "1" {
 		return NewChildListener()
 	}
-	inner, err := net.Listen(network, address)
+	var lc net.ListenConfig
+	inner, err := lc.Listen(ctx, network, address)
 	if err != nil {
 		return nil, err
 	}

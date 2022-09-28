@@ -22,6 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// FileConn is a connection that can be transferred to a child process using file descriptors.
 type FileConn interface {
 	net.Conn
 	File() (*os.File, error)
@@ -35,6 +36,7 @@ type listener struct {
 	opts *options
 }
 
+// Start starts the listener in the background.
 func (l *listener) Start() error {
 	l.wg.Add(1)
 	go func() {
@@ -44,7 +46,7 @@ func (l *listener) Start() error {
 	return nil
 }
 
-// Wait wait for the listener to exit
+// Wait waits for the listener to exit
 func (l *listener) Wait() error {
 	l.wg.Wait()
 	select {
@@ -55,10 +57,20 @@ func (l *listener) Wait() error {
 	}
 }
 
+// Run starts the listener in the background and waits for it to exit.
+func (l *listener) Run() error {
+	if err := l.Start(); err != nil {
+		return err
+	}
+	return l.Wait()
+}
+
+// IsChild returns true if the current process is a forked child process.
 func (l *listener) IsChild() bool {
 	return false
 }
 
+// IsParent returns true if the current process is the main (parent) process.
 func (l *listener) IsParent() bool {
 	return true
 }

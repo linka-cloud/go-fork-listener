@@ -34,10 +34,7 @@ func main() {
 
 	if lis.IsParent() {
 		// do some configuration checks or other things that need to be done only once
-		if err := lis.Start(); err != nil {
-			logrus.Fatal(err)
-		}
-		if err := lis.Wait(); err != nil {
+		if err := lis.Run(); err != nil {
 			logrus.Fatal(err)
 		}
 		return

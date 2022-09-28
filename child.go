@@ -26,10 +26,6 @@ func NewChildListener() (Listener, error) {
 	if f == nil {
 		return nil, errors.New("invalid connection file descriptor")
 	}
-	return newListener(f)
-}
-
-func newListener(f *os.File) (Listener, error) {
 	c, err := net.FileConn(f)
 	if err != nil {
 		return nil, err
@@ -53,11 +49,15 @@ type forkedListener struct {
 }
 
 func (l *forkedListener) Start() error {
-	return nil
+	return errors.New("cannot start a child listener")
 }
 
 func (l *forkedListener) Wait() error {
-	return nil
+	return errors.New("cannot wait on a child listener")
+}
+
+func (l *forkedListener) Run() error {
+	return errors.New("cannot run a child listener")
 }
 
 func (l *forkedListener) IsChild() bool {
